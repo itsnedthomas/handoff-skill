@@ -197,7 +197,7 @@ Paste this into any Claude Code session and the entire handoff system sets itsel
 ```
 Set up my project for session handoffs. Do all of this automatically without asking me questions:
 
-1. Create .claude/skills/handoff/SKILL.md with the Kaizen handoff skill (fetch it from https://raw.githubusercontent.com/nedthomas/kaizen-handoff/main/SKILL.md)
+1. Create .claude/skills/handoff/SKILL.md with the Kaizen handoff skill (fetch it from https://raw.githubusercontent.com/itsnedthomas/kaizen-handoff/main/SKILL.md)
 2. If CLAUDE.md doesn't exist in the project root, create a starter one with sections for: About Me, What This Project Does, Tech Stack, Current Status, and a Conversation Log section at the bottom
 3. Confirm what was created and tell me to type /handoff at the end of any session to save my progress
 ```
