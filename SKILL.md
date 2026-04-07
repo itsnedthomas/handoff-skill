@@ -66,6 +66,18 @@ After the first-run explanation, proceed with the normal handoff workflow below.
 
 ---
 
+## Session Start (auto-recall)
+
+At the **start of every new session**, before doing any work:
+
+1. Check if `conversation-log.md` exists in the project root
+2. If it does, read **only the last session entry** (the most recent `## Session N` block) — not the whole file
+3. Use that to pick up context from the previous session
+
+This means even without a handoff prompt pasted in, Claude knows what happened last time. The handoff prompt is a bonus shortcut, not the only bridge between sessions.
+
+---
+
 ## When to Use
 
 - End of every work session
