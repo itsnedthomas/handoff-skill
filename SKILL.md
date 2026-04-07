@@ -71,10 +71,10 @@ After the first-run explanation, proceed with the normal handoff workflow below.
 At the **start of every new session**, before doing any work:
 
 1. Check if `conversation-log.md` exists in the project root
-2. If it does, read **only the last session entry** (the most recent `## Session N` block) — not the whole file
-3. Use that to pick up context from the previous session
+2. If it does, read the **last 3 session entries** (the most recent `## Session N` blocks) — not the whole file
+3. Use those to pick up context — what was built, what failed, what decisions were made, and what's next
 
-This means even without a handoff prompt pasted in, Claude knows what happened last time. The handoff prompt is a bonus shortcut, not the only bridge between sessions.
+This means even without a handoff prompt pasted in, Claude knows what's been happening recently. The handoff prompt is a bonus shortcut, not the only bridge between sessions.
 
 ---
 
