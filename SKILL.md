@@ -1,35 +1,92 @@
 ---
 name: handoff
-description: Session handoff skill for kaizen students — saves progress, updates logs, commits code, and generates a handoff prompt so the next session picks up seamlessly. Drop this into any project's .claude/skills/ folder. Written & Orchestrated by Ned Thomas.
+description: Session handoff skill — saves progress, auto-logs context, and generates a handoff prompt so your next session picks up exactly where you left off. Built by Ned Thomas.
 ---
 
 # Handoff
 
-Cleanly wrap up the current session so the next one can pick up seamlessly. Works across devices.
+## First-Run Setup (automatic — runs once on first /handoff)
 
-**Every step is mandatory. No skipping. Auto-create any files that don't exist yet.**
+On the FIRST invocation of `/handoff`, check if `CLAUDE.md` exists in the project root.
+
+**If it doesn't exist**, create a starter `CLAUDE.md`:
+
+```markdown
+# [Project Name] — CLAUDE.md
+
+## About Me
+- Name: [Your name]
+- Business/Role: [What you do]
+- Location: [City/timezone]
+- Communication style: [e.g. "Keep it simple, no jargon, be direct"]
+
+## What This Project Does
+[One-liner about what you're building]
+
+## Tech Stack
+[List the tools, languages, and services you use]
+
+## Current Status
+[What's built so far, what stage you're at]
+
+## Obsidian Vault (Optional)
+<!-- If you use Obsidian as a second brain, uncomment the line below and set your vault path. The handoff skill will automatically sync your session notes there. -->
+<!-- vault_path: ~/Documents/second-brain/ -->
+```
+
+Then explain to the user:
+
+---
+
+**Welcome — your handoff system is set up.**
+
+**What this does:** At the end of every session, type `/handoff` and I'll automatically save everything — what we built, what failed, what's next — into files in your project. That way when you start a fresh session, you can pick up exactly where you left off without re-explaining anything.
+
+**What gets created each time you run /handoff:**
+- **conversation-log.md** — a running diary of every session (what was done, decisions, failures, next steps). I create this automatically.
+- **backlog.md** — unfinished tasks with enough context to pick them up cold. I create this automatically.
+- If you use **Obsidian**, it syncs your notes there too (set your vault path in CLAUDE.md to enable this)
+- If you use **git**, it commits and pushes your work automatically
+
+**When to use it:**
+- End of every work session — just type `/handoff`
+- When your conversation is getting long and things are slowing down
+- When you've finished a big chunk of work
+- Before switching to a different project
+
+**What you do with the output:** I'll give you a handoff prompt at the end. Copy it. Start a new Claude Code session. Paste it as your first message. I'll know exactly what's going on without you explaining anything.
+
+**One more thing:** I've created a `CLAUDE.md` file in your project root. Fill in the blanks when you get a chance — I read this automatically at the start of every session so I always know your project context.
+
+---
+
+After the first-run explanation, proceed with the normal handoff workflow below.
+
+**If `CLAUDE.md` already exists**, skip the setup explanation — go straight to the handoff.
+
+---
 
 ## When to Use
 
-- Context window is getting heavy (long conversation, lots of tool calls)
-- You're wrapping up for the day
+- End of every work session
+- Conversation is getting long or slowing down
 - You've finished a major piece of work
-- You're about to switch to a different project
-- Invoke manually with `/handoff`
+- You're switching to a different project
+- Type `/handoff` to trigger
 
-## Workflow
+## Handoff Workflow
+
+Every step is mandatory. Auto-create any files that don't exist. No skipping.
 
 ```
 1. Log       → Create/update conversation-log.md (auto-create if missing)
 2. Backlog   → Create/update backlog.md with remaining tasks (auto-create if missing)
-3. Vault     → Sync to Obsidian vault (only if configured in CLAUDE.md — skip otherwise)
-4. Git       → Commit and push (only if this is a git repo — skip otherwise)
-5. Handoff   → Generate handoff prompt and explain how to use it
+3. Vault     → Sync to Obsidian vault (only if vault_path is set in CLAUDE.md)
+4. Git       → Commit and push (only if .git exists — skip otherwise)
+5. Handoff   → Generate handoff prompt and tell the user what to do with it
 ```
 
----
-
-## Step 1: Update Conversation Log
+### Step 1: Update Conversation Log
 
 **If `conversation-log.md` doesn't exist in the project root, create it.**
 
@@ -54,32 +111,30 @@ Append a new session entry — never overwrite previous entries.
 - [Prioritised list of next steps]
 ```
 
-**How to determine the session number:** Read the existing conversation-log.md, find the highest session number, and increment by 1. If the file is new or empty, start at Session 1.
+**Session number:** Read the existing conversation-log.md, find the highest session number, increment by 1. New or empty file = Session 1.
 
-## Step 2: Capture Remaining Tasks
+### Step 2: Capture Remaining Tasks
 
 **If `backlog.md` doesn't exist in the project root, create it.**
 
-Add unfinished work with enough context that a fresh session can pick it up without needing the old conversation.
-
-Format:
+Add unfinished work with enough context to pick it up without the old conversation.
 
 ```markdown
 - [ ] [Task description] — [Why it matters / context needed to do it]
 ```
 
-If all tasks were completed this session and there's nothing outstanding, still create the file but note that the backlog is clear.
+If everything was completed and nothing is outstanding, note that the backlog is clear.
 
-## Step 3: Sync to Obsidian Vault (Conditional)
+### Step 3: Sync to Obsidian Vault
 
-**Check the user's CLAUDE.md for an Obsidian vault path** (look for `vault_path`, `obsidian`, `second-brain`, or similar).
+**Check CLAUDE.md for a `vault_path` setting.**
 
-- **If found:** sync session context to the vault (see below)
-- **If not found:** skip this step entirely and move to Step 4
+- **If found:** sync session context to the vault (steps below)
+- **If not found:** skip this step entirely
 
-### 3a. Update or create the project note
+#### 3a. Update or create the project note
 
-Find or create a project note at `{vault_path}/Projects/{project-name}.md`:
+Find or create `{vault_path}/Projects/{project-name}.md`:
 
 ```markdown
 # {Project Name}
@@ -97,9 +152,9 @@ Find or create a project note at `{vault_path}/Projects/{project-name}.md`:
 - Open issues
 ```
 
-Append to the Progress Log — never overwrite previous entries.
+Append to the Progress Log — never overwrite.
 
-### 3b. Save task notes (if needed)
+#### 3b. Save task notes (if needed)
 
 For significant unfinished work, create `{vault_path}/Tasks/{task-name}.md`:
 
@@ -120,35 +175,34 @@ created: {date}
 [Enough detail to pick this up cold]
 ```
 
-### 3c. Save key learnings (if any)
+#### 3c. Save key learnings (if any)
 
-Non-obvious insights or failed approaches worth remembering — create a note in `{vault_path}/Learnings/` or similar.
+Non-obvious insights or failed approaches — create a note in `{vault_path}/Learnings/`.
 
-## Step 4: Commit & Push (Conditional)
+### Step 4: Commit & Push
 
-**First, check if this project is a git repository** (look for a `.git` folder in the project root).
+**Check if `.git` exists in the project root.**
 
-- **If NOT a git repo:** skip this step entirely and move to Step 5
-- **If it IS a git repo:** commit and push using the steps below
+- **No `.git` folder:** skip this step entirely
+- **Git repo exists:** commit and push
 
 ```bash
 git fetch origin && git status
-# Check for divergence — pull first if needed
-git add {specific files}  # Never git add -A (may include secrets)
-git commit -m "Session handoff: [brief description of work done]"
+git add {specific files}
+git commit -m "Session handoff: [brief description]"
 git push origin main
 ```
 
 **Safety rules:**
-- Always `git fetch` before committing to check for remote changes
-- If local and remote have diverged, pull first (use `--no-rebase` to avoid conflicts)
-- Stage specific files by name — never use `git add -A` or `git add .` (risk of committing .env files, secrets, or temp files)
+- Always `git fetch` before committing
+- If diverged, pull first (`--no-rebase`)
+- Stage specific files by name — never `git add -A` or `git add .`
 - If push fails, pull and retry — never force push
-- If there's no remote configured (local-only repo), just commit — skip the push
+- No remote configured? Just commit, skip the push
 
-## Step 5: Generate Handoff Prompt
+### Step 5: Generate Handoff Prompt
 
-Output a complete handoff prompt that the user can copy:
+Output this for the user to copy:
 
 ```
 ## Handoff — [Project Name] — [Date]
@@ -163,43 +217,29 @@ Output a complete handoff prompt that the user can copy:
 - [Partially done items with current state]
 
 ### Failed Approaches
-- [What didn't work and why — so the next session doesn't repeat it]
+- [What didn't work and why — prevents repeating mistakes]
 
 ### Next Steps
 1. [Prioritised action items]
 2. [Include exact commands or file paths where helpful]
 
 ### Key Files
-- [List of files that were created or modified this session]
+- [Files created or modified this session]
 
 ### Verification
-- [How to verify the work done this session — e.g. "run npm test", "check localhost:3000"]
+- [How to verify the work — e.g. "run npm test", "check localhost:3000"]
 ```
 
 Then tell the user:
 
-**"Copy the handoff prompt above. When you start your next Claude Code session, paste it in as your first message. Claude will read your CLAUDE.md automatically AND have the handoff context — so it knows both your project setup and exactly where you left off. You won't need to re-explain anything."**
+**"Copy the handoff prompt above. Start a new Claude Code session and paste it as your first message. I'll read your CLAUDE.md automatically AND have the handoff context — so I know your project setup and exactly where you left off. You won't need to re-explain anything."**
 
 ---
 
-## Important Rules
+## Rules
 
-- **Auto-create missing files** — conversation-log.md and backlog.md should be created automatically if they don't exist. Never ask the user to create them manually.
-- **Never skip the conversation log** — this is how context survives between sessions
-- **Include failed approaches** — the biggest time waste is repeating work that already didn't work
-- **Append, don't overwrite** — conversation logs and project notes should accumulate over time, building a history of the project
-- **Gracefully skip what doesn't apply** — no git? Skip the commit. No Obsidian? Skip the vault sync. The skill should work for everyone regardless of their setup.
-
-## Quick Start — One-Command Install
-
-Paste this into any Claude Code session and the entire handoff system sets itself up:
-
-```
-Set up my project for session handoffs. Do all of this automatically without asking me questions:
-
-1. Create .claude/skills/handoff/SKILL.md with the Kaizen handoff skill (fetch it from https://raw.githubusercontent.com/itsnedthomas/kaizen-handoff/main/SKILL.md)
-2. If CLAUDE.md doesn't exist in the project root, create a starter one with sections for: About Me, What This Project Does, Tech Stack, Current Status, and a Conversation Log section at the bottom
-3. Confirm what was created and tell me to type /handoff at the end of any session to save my progress
-```
-
-That's it. One paste, everything gets built. Then just type `/handoff` whenever you're done working.
+- **Auto-create everything** — conversation-log.md, backlog.md, and CLAUDE.md get created automatically if missing. Never ask the user to make files manually.
+- **Never skip the conversation log** — this is how context survives between sessions.
+- **Include failed approaches** — the biggest time waste is repeating work that already didn't work.
+- **Append, don't overwrite** — logs and notes accumulate over time, building project history.
+- **Gracefully skip what doesn't apply** — no git? Skip commit. No Obsidian? Skip vault sync. Works for everyone regardless of setup.
